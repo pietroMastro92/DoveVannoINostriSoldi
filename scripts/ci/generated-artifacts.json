@@ -756,7 +756,7 @@
     },
     {
       "id": "public-research",
-      "owner": "Ricerca pubblica: FOE, USTAT e CNR DSB",
+      "owner": "Ricerca pubblica: FOE, USTAT e gerarchia CNR",
       "files": [
         "src/data/generated/public-research-snapshot.json"
       ],
@@ -772,11 +772,11 @@
         "tests/public-research.test.mjs"
       ],
       "generator": {
-        "command": "python3 scripts/etl/public_research_snapshot.py --ustat-csv <official-USTAT-CSV>",
+        "command": "python3 scripts/etl/public_research_snapshot.py --verify-pins --ustat-csv <official-USTAT-CSV>",
         "requiresNetworkInput": true
       },
       "refreshWorkflow": null,
-      "trustModel": "Snapshot derivato da MUR FOE, USTAT e schede pubbliche CNR DSB con hash delle ricevute. Il controllo offline valida riferimenti, periodi, duplicati, interi in centesimi e assenza di dati individuali; la copertura parziale impedisce di presentare il FOE come ripartito tra istituti CNR."
+      "trustModel": "Snapshot derivato da MUR FOE, USTAT, directory CNR e schede pubbliche CNR DSB con hash delle ricevute e metadati organizzativi osservati. Il controllo offline valida riferimenti, periodi, duplicati, interi in centesimi e assenza di dati individuali; la rigenerazione richiede una nuova acquisizione online e revisione dei pin. La copertura parziale impedisce di presentare il FOE come ripartito tra istituti CNR."
     },
     {
       "id": "source-ledger-proofs",

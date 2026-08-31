@@ -159,6 +159,18 @@ export const publicSources: PublicSource[] = [
     joinKeys: ["codice istituto CNR", "anno scheda"],
   },
   {
+    slug: "cnr-structure",
+    name: "CNR · directory dipartimenti e istituti",
+    owner: "Consiglio Nazionale delle Ricerche",
+    area: "Gerarchia organizzativa CNR",
+    cadence: "Annuale",
+    coverage: "Sette dipartimenti e 83 afferenze di istituto nella directory osservata",
+    format: "HTML · snapshot JSON verificato",
+    url: "https://www.cnr.it/it/istituti",
+    note: "La directory è una fotografia organizzativa; il CNR overview dichiara una rete di 88 istituti, mentre la directory osservata ne elenca 83. Le differenze di riordino restano esplicite e non generano stime finanziarie.",
+    joinKeys: ["codice CNR", "codice CDS.UO", "dipartimento"],
+  },
+  {
     slug: "anac",
     name: "BDNCP / dati aperti ANAC",
     owner: "Autorità Nazionale Anticorruzione",

@@ -27,7 +27,8 @@ export type SourceId =
   | "governi-presidenza"
   | "mur-foe"
   | "ustat-personale"
-  | "cnr-dsb";
+  | "cnr-dsb"
+  | "cnr-structure";
 
 export type SourceCadence =
   | "giornaliera"
@@ -428,6 +429,20 @@ export const SOURCE_POLICIES: Readonly<Record<SourceId, SourcePolicy>> = {
     timeoutMs: 30_000,
     maxRetries: 1,
     tags: ["source:cnr-dsb", "domain:public-research"],
+  },
+  "cnr-structure": {
+    id: "cnr-structure",
+    label: "CNR · directory dipartimenti e istituti",
+    owner: "Consiglio Nazionale delle Ricerche",
+    sourceUrl: "https://www.cnr.it/it/istituti",
+    cadence: "annuale",
+    cadenceNote: "La directory CNR pubblica la gerarchia dipartimenti/istituti; gli atti di riordino possono modificare afferenze e stato.",
+    discoveryRevalidateSeconds: DAY,
+    dataRevalidateSeconds: DAY,
+    staleAfterSeconds: null,
+    timeoutMs: 30_000,
+    maxRetries: 1,
+    tags: ["source:cnr-structure", "domain:public-research"],
   },
 };
 

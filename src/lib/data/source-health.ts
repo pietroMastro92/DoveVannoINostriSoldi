@@ -595,13 +595,17 @@ function snapshotManagedGovernmentCurrentSignals(): SourceHealth {
   };
 }
 
-function snapshotManagedPublicResearch(sourceId: "mur-foe" | "ustat-personale" | "cnr-dsb"): SourceHealth {
-  const source = publicResearchSnapshot.sources.find((item) => item.id === sourceId || item.id.startsWith(`${sourceId}-`));
+function snapshotManagedPublicResearch(sourceId: "mur-foe" | "ustat-personale" | "cnr-dsb" | "cnr-structure"): SourceHealth {
+  const source = publicResearchSnapshot.sources
+    .filter((item) => item.id === sourceId || item.id.startsWith(`${sourceId}-`))
+    .sort((left, right) => right.id.localeCompare(left.id, "en", { numeric: true }))[0];
   const recordCount = sourceId === "ustat-personale"
     ? publicResearchSnapshot.observations.filter((row) => row.sourceIds.includes("ustat-personale")).length
     : sourceId === "cnr-dsb"
       ? publicResearchSnapshot.observations.filter((row) => row.sourceIds.some((id) => id.startsWith("cnr-dsb-") || id === "cnr-dsb-index")).length
-      : publicResearchSnapshot.observations.filter((row) => row.sourceIds.some((id) => id.startsWith("mur-foe-"))).length;
+      : sourceId === "cnr-structure"
+        ? publicResearchSnapshot.entities.filter((entity) => entity.sourceIds.includes("cnr-structure")).length
+        : publicResearchSnapshot.observations.filter((row) => row.sourceIds.some((id) => id.startsWith("mur-foe-"))).length;
   return {
     ...baseHealth(sourceId),
     reachability: "not-probed",
@@ -666,6 +670,7 @@ export function getSnapshotManagedSourceHealth(): SourceHealth[] {
     snapshotManagedPublicResearch("mur-foe"),
     snapshotManagedPublicResearch("ustat-personale"),
     snapshotManagedPublicResearch("cnr-dsb"),
+    snapshotManagedPublicResearch("cnr-structure"),
   ];
 }
 
@@ -699,6 +704,7 @@ export const SOURCE_HEALTH_ADAPTERS = Object.freeze({
   "mur-foe": () => snapshotManagedPublicResearch("mur-foe"),
   "ustat-personale": () => snapshotManagedPublicResearch("ustat-personale"),
   "cnr-dsb": () => snapshotManagedPublicResearch("cnr-dsb"),
+  "cnr-structure": () => snapshotManagedPublicResearch("cnr-structure"),
 } satisfies Record<SourceId, SourceHealthAdapter>);
 
 /** Orders every adapter by the public registry and fails closed on omissions. */

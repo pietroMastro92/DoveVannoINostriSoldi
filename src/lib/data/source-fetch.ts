@@ -66,6 +66,7 @@ const ALLOWED_HOSTS: Readonly<Record<SourceId, readonly string[]>> = {
   "mur-foe": [],
   "ustat-personale": [],
   "cnr-dsb": [],
+  "cnr-structure": [],
 };
 
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);

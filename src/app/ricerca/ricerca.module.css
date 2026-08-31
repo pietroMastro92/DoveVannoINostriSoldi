@@ -31,6 +31,7 @@
 .selectedRow { background: var(--color-accent-100); }
 .twoColumns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
 .trendGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+.subheading { margin: 18px 0 0; color: var(--color-neutral-800); font-size: 13px; }
 .trendItem { display: grid; gap: 4px; min-width: 0; padding: 10px 8px; background: var(--color-neutral-100); border-top: 3px solid var(--color-accent-300); }
 .trendItem span { color: var(--color-neutral-600); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
 .trendItem strong { color: var(--color-accent-900); font-size: 18px; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }

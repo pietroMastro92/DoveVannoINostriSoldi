@@ -34,9 +34,13 @@ export type PublicResearchEntityOption = Readonly<Pick<ResearchEntity, "id" | "c
 
 export type PublicResearchSummary = Readonly<{
   fundingAllocation: ResearchObservation[];
+  assessedResources: ResearchObservation[];
   permanentHeadcount: ResearchObservation[];
+  researcherHeadcount: ResearchObservation[];
   nonPermanentHeadcount: ResearchObservation[];
   researchAppointmentCount: ResearchObservation[];
+  infrastructureCost: ResearchObservation[];
+  projectCount: ResearchObservation[];
 }>;
 
 export type PublicResearchView = Readonly<{
@@ -44,6 +48,7 @@ export type PublicResearchView = Readonly<{
   selectedEntity: PublicResearchEntityOption;
   summary: PublicResearchSummary;
   fundingTrend: ResearchObservation[];
+  assessedTrend: ResearchObservation[];
   universityTrend: ResearchObservation[];
   cnrDepartment: PublicResearchEntityOption;
   cnrInstitutes: PublicResearchEntityOption[];
@@ -51,6 +56,10 @@ export type PublicResearchView = Readonly<{
     permanentHeadcount: number | null;
     researchAppointmentCount: number | null;
     fundingAllocation: number | null;
+    assessedResources: number | null;
+    researcherHeadcount: number | null;
+    infrastructureCost: number | null;
+    projectCount: number | null;
   }>;
   periods: ResearchPublicSnapshot["periods"];
   entityOptions: PublicResearchEntityOption[];
@@ -67,12 +76,16 @@ const entityById = new Map(publicResearchSnapshot.entities.map((entity) => [enti
 const periodByYear = new Map(publicResearchSnapshot.periods.map((period) => [period.year, period]));
 const metricLabels: Record<ResearchMetric, string> = {
   fundingAllocation: "Finanziamento assegnato",
+  assessedResources: "Risorse assestate",
   cashPayment: "Pagamenti di cassa",
   economicCost: "Costo economico",
   permanentHeadcount: "Personale strutturato",
+  researcherHeadcount: "Ricercatori",
   nonPermanentHeadcount: "Personale non strutturato",
   researchAppointmentCount: "Assegni e borse osservati",
   researchAppointmentGross: "Compensi assegni e borse",
+  infrastructureCost: "Risorse infrastrutture di ricerca",
+  projectCount: "Progetti osservati",
   procurementAwarded: "Appalti aggiudicati",
   procurementLiquidated: "Appalti liquidati",
   projectCost: "Costo progetti",
@@ -97,7 +110,11 @@ function resolveEntity(value: string | undefined, allowedKinds?: readonly Resear
   const query = normalized(value);
   if (!query || query === PUBLIC_RESEARCH_ALL) return null;
   const candidates = publicResearchSnapshot.entities.filter((entity) => !allowedKinds || allowedKinds.includes(entity.kind));
-  const found = candidates.find((entity) => [entity.id, entity.code, entity.name].some((candidate) => normalized(candidate) === query));
+  const found = candidates.find((entity) => {
+    const aliases = [entity.id, entity.code, entity.name];
+    if (entity.kind === "cnr-department") aliases.push(entity.id.replace("cnr-department-", ""));
+    return aliases.some((candidate) => normalized(candidate) === query);
+  });
   return found ?? null;
 }
 
@@ -210,26 +227,46 @@ export function getPublicResearchView(filters: PublicResearchFilters = {}): Publ
     ?? (normalizedFilters.entityKind === "university" ? entityById.get("research-system") : null)
     ?? entityById.get("epr-cnr")
     ?? publicResearchSnapshot.entities[0]!;
-  const department = normalizedFilters.department ?? entityById.get("cnr-dsb")!;
+  const selectedDepartment = selectedEntity.kind === "cnr-institute" && selectedEntity.parentId
+    ? entityById.get(selectedEntity.parentId)
+    : selectedEntity.kind === "cnr-department" ? selectedEntity : null;
+  const department = normalizedFilters.department ?? selectedDepartment ?? entityById.get("cnr-dsb")!;
   const instituteRows = publicResearchSnapshot.entities
     .filter((entity) => entity.kind === "cnr-institute" && entity.parentId === department.id)
     .map((institute) => ({
       ...entityOption(institute),
       permanentHeadcount: numericValue(currentStaffRows(institute, "permanentHeadcount")),
+      researcherHeadcount: numericValue(currentStaffRows(institute, "researcherHeadcount")),
       researchAppointmentCount: numericValue(currentStaffRows(institute, "researchAppointmentCount")),
       fundingAllocation: numericValue(directOrDescendantRows(institute, normalizedFilters.year, "fundingAllocation")),
+      assessedResources: numericValue(directOrDescendantRows(institute, 2024, "assessedResources")),
+      infrastructureCost: numericValue(directOrDescendantRows(institute, 2024, "infrastructureCost")),
+      projectCount: numericValue(directOrDescendantRows(institute, 2024, "projectCount")),
     }))
     .sort((left, right) => (right.permanentHeadcount ?? -1) - (left.permanentHeadcount ?? -1));
 
   const summary = {
-    fundingAllocation: directOrDescendantRows(selectedEntity, normalizedFilters.year, "fundingAllocation"),
+    fundingAllocation: selectedEntity.kind === "system" && normalizedFilters.entityKind === "university"
+      ? []
+      : directOrDescendantRows(selectedEntity, normalizedFilters.year, "fundingAllocation"),
+    assessedResources: selectedEntity.kind === "system" && normalizedFilters.entityKind === "university"
+      ? []
+      : directOrDescendantRows(selectedEntity, normalizedFilters.year, "assessedResources"),
     permanentHeadcount: currentStaffRows(selectedEntity, "permanentHeadcount"),
+    researcherHeadcount: currentStaffRows(selectedEntity, "researcherHeadcount"),
     nonPermanentHeadcount: currentStaffRows(selectedEntity, "nonPermanentHeadcount"),
     researchAppointmentCount: currentStaffRows(selectedEntity, "researchAppointmentCount"),
+    infrastructureCost: directOrDescendantRows(selectedEntity, normalizedFilters.year, "infrastructureCost"),
+    projectCount: directOrDescendantRows(selectedEntity, normalizedFilters.year, "projectCount"),
   } satisfies PublicResearchSummary;
   const fundingTrend = publicResearchSnapshot.observations
     .filter((row) => row.entityId === selectedEntity.id && row.metric === "fundingAllocation")
     .sort((left, right) => left.year - right.year);
+  const assessedTrend = selectedEntity.kind === "system" && normalizedFilters.entityKind === "university"
+    ? []
+    : publicResearchYearOptions()
+      .flatMap((period) => directOrDescendantRows(selectedEntity, period.year, "assessedResources"))
+      .sort((left, right) => left.year - right.year || left.entityId.localeCompare(right.entityId));
   const universityTrend = publicResearchSnapshot.observations
     .filter((row) => row.entityId === "research-system" && row.metric !== "fundingAllocation")
     .sort((left, right) => left.year - right.year);
@@ -239,6 +276,7 @@ export function getPublicResearchView(filters: PublicResearchFilters = {}): Publ
     selectedEntity: entityOption(selectedEntity),
     summary,
     fundingTrend,
+    assessedTrend,
     universityTrend,
     cnrDepartment: entityOption(department),
     cnrInstitutes: publicResearchSnapshot.entities.filter((entity) => entity.parentId === department.id).map(entityOption),

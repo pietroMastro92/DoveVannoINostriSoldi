@@ -19,7 +19,7 @@ import styles from "./ricerca.module.css";
 export const metadata: Metadata = {
   title: "Ricerca pubblica",
   description:
-    "Finanziamenti, personale e precariato della ricerca pubblica italiana: FOE, università USTAT e dettaglio degli istituti CNR DSB.",
+    "Finanziamenti, personale e precariato della ricerca pubblica italiana: FOE, università USTAT e gerarchia CNR per dipartimento e istituto.",
 };
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -29,18 +29,22 @@ function first(value: string | string[] | undefined): string | undefined {
 }
 
 function metricValue(rows: readonly ResearchObservation[], metric: ResearchMetric): number | null {
-  const row = rows.find((item) => item.metric === metric);
-  return row?.value ?? null;
+  const matching = rows.filter((item) => item.metric === metric);
+  return matching.length > 0 ? matching.reduce((total, item) => total + item.value, 0) : null;
+}
+
+function isMoneyMetric(metric: ResearchMetric): boolean {
+  return ["fundingAllocation", "assessedResources", "infrastructureCost", "cashPayment", "economicCost", "researchAppointmentGross", "procurementAwarded", "procurementLiquidated", "projectCost", "projectPayment"].includes(metric);
 }
 
 function displayValue(value: number | null, metric: ResearchMetric): string {
   if (value === null) return "n.d.";
-  return metric === "fundingAllocation" ? compactEuroFromCents(value) : integer(value);
+  return isMoneyMetric(metric) ? compactEuroFromCents(value) : integer(value);
 }
 
 function exactValue(value: number | null, metric: ResearchMetric): string {
   if (value === null) return "dato non disponibile";
-  return metric === "fundingAllocation"
+  return isMoneyMetric(metric)
     ? `${(value / 100).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
     : integer(value);
 }
@@ -73,8 +77,16 @@ function staffRowsByYear(rows: readonly ResearchObservation[]) {
   return publicResearchYearOptions().map((period) => ({
     year: period.year,
     permanent: metricValue(rows.filter((row) => row.year === period.year), "permanentHeadcount"),
+    researchers: metricValue(rows.filter((row) => row.year === period.year), "researcherHeadcount"),
     nonPermanent: metricValue(rows.filter((row) => row.year === period.year), "nonPermanentHeadcount"),
-  })).filter((row) => row.permanent !== null || row.nonPermanent !== null);
+  })).filter((row) => row.permanent !== null || row.researchers !== null || row.nonPermanent !== null);
+}
+
+function resourceRowsByYear(rows: readonly ResearchObservation[]) {
+  return publicResearchYearOptions().map((period) => ({
+    year: period.year,
+    value: metricValue(rows.filter((row) => row.year === period.year), "assessedResources"),
+  })).filter((row) => row.value !== null);
 }
 
 export default async function PublicResearchPage({
@@ -92,9 +104,16 @@ export default async function PublicResearchPage({
     metric: first(params.metric),
   });
   const selectedFunding = metricValue(view.summary.fundingAllocation, "fundingAllocation");
+  const selectedAssessedResources = metricValue(view.summary.assessedResources, "assessedResources");
   const selectedPermanent = metricValue(view.summary.permanentHeadcount, "permanentHeadcount");
+  const selectedResearchers = metricValue(view.summary.researcherHeadcount, "researcherHeadcount");
   const selectedAppointments = metricValue(view.summary.researchAppointmentCount, "researchAppointmentCount");
+  const selectedInfrastructure = metricValue(view.summary.infrastructureCost, "infrastructureCost");
+  const selectedProjects = metricValue(view.summary.projectCount, "projectCount");
+  const headlineMetric: ResearchMetric = selectedFunding !== null ? "fundingAllocation" : "assessedResources";
+  const headlineValue = selectedFunding ?? selectedAssessedResources;
   const universityStaff = staffRowsByYear(view.universityTrend);
+  const assessedResourcesTrend = resourceRowsByYear(view.assessedTrend);
   const latestSource = view.sources.reduce((latest, source) => source.observedAt > latest ? source.observedAt : latest, "");
   const selectedEntityOptions = entityOptionsByKind(view.entityOptions, "epr");
   const universityOptions = entityOptionsByKind(view.entityOptions, "university");
@@ -116,7 +135,7 @@ export default async function PublicResearchPage({
           <p>
             Mettiamo nello stesso quadro finanziamenti, ricercatori e personale non strutturato,
             mantenendo separati i perimetri contabili. Per il CNR puoi scendere dal totale FOE al
-            Dipartimento di scienze biomediche e ai suoi 14 istituti.
+            dipartimento e al singolo istituto. Le serie finanziarie e di personale oggi disponibili a grana istituto provengono dalle 14 schede DSB.
           </p>
         </div>
         <div className={styles.heroMeta}>
@@ -172,18 +191,23 @@ export default async function PublicResearchPage({
             <h2 id="scope-title" className="panel-title">Perimetro selezionato</h2>
             <span className="status status-attiva">{labelForKind(view.selectedEntity.kind)}</span>
           </div>
-          <strong className={styles.headline}>{displayValue(selectedFunding, "fundingAllocation")}</strong>
-          <p className={styles.headlineNote}>assegnazione osservata · anno {view.year} · {view.selectedEntity.name}</p>
+          <strong className={styles.headline}>{displayValue(headlineValue, headlineMetric)}</strong>
+          <p className={styles.headlineNote}>{headlineMetric === "fundingAllocation" ? "assegnazione FOE osservata" : "risorse assestate osservate"} · anno {view.year} · {view.selectedEntity.name}</p>
           <dl className={styles.factRows}>
             <div><dt>Personale strutturato</dt><dd>{displayValue(selectedPermanent, "permanentHeadcount")}</dd></div>
+            <div><dt>Ricercatori</dt><dd>{displayValue(selectedResearchers, "researcherHeadcount")}</dd></div>
             <div><dt>Assegni/borse osservati</dt><dd>{displayValue(selectedAppointments, "researchAppointmentCount")}</dd></div>
-            <div><dt>Anno personale DSB</dt><dd>{PUBLIC_RESEARCH_CURRENT_STAFF_YEAR}</dd></div>
+            <div><dt>Infrastrutture (triennio)</dt><dd>{displayValue(selectedInfrastructure, "infrastructureCost")}</dd></div>
+            <div><dt>Progetti osservati</dt><dd>{displayValue(selectedProjects, "projectCount")}</dd></div>
+            <div><dt>Anno personale schede DSB</dt><dd>{PUBLIC_RESEARCH_CURRENT_STAFF_YEAR}</dd></div>
             <div><dt>Copertura fonti</dt><dd>{view.sources.length} ricevute</dd></div>
           </dl>
           <p className={styles.definition}>
-            {selectedFunding === null
-              ? "Per questo perimetro la fonte di finanziamento non è disponibile nello snapshot."
-              : `Valore esatto: ${exactValue(selectedFunding, "fundingAllocation")}. Il dato è di competenza e non è un pagamento di cassa.`}
+            {headlineValue === null
+              ? "Per questo perimetro la fonte di finanziamento o di risorse assestate non è disponibile nello snapshot."
+              : headlineMetric === "fundingAllocation"
+                ? `Valore esatto: ${exactValue(headlineValue, headlineMetric)}. Il dato è di competenza e non è un pagamento di cassa.`
+                : `Valore esatto: ${exactValue(headlineValue, headlineMetric)}. È una risorsa assestata osservata nella scheda CNR, non il bilancio completo dell'istituto.`}
           </p>
         </section>
 
@@ -207,28 +231,32 @@ export default async function PublicResearchPage({
             <span className={styles.kicker}>Drill-down CNR</span>
             <h2 id="cnr-title" className="panel-title">Dal dipartimento al singolo istituto</h2>
           </div>
-          <Link href={hrefFor("CNR", view.year, view.cnrDepartment.code)}>Apri DSB →</Link>
+          <Link href={hrefFor(undefined, view.year, view.cnrDepartment.code)}>Apri perimetro →</Link>
         </div>
         <p className={styles.sectionLead}>
-          Il FOE CNR resta visibile come assegnazione dell&apos;ente. Le righe sotto provengono dalle schede pubbliche del solo
-          Dipartimento di scienze biomediche (DSB) e mostrano risorse assestate 2024 e personale 2025, senza attribuire il FOE.
+          Il FOE CNR resta visibile come assegnazione dell&apos;ente. La gerarchia sotto contiene i sette dipartimenti e gli 83 istituti
+          presenti nella directory CNR; le risorse e il personale a grana istituto sono osservati nelle schede del solo Dipartimento
+          di scienze biomediche (DSB), senza attribuire il FOE alle strutture interne.
         </p>
-        <div className="table-scroll" role="region" aria-label="Istituti CNR del Dipartimento di scienze biomediche" tabIndex={0}>
+        <div className="table-scroll" role="region" aria-label={`Istituti CNR del ${view.cnrDepartment.name}`} tabIndex={0}>
           <table className="table">
-            <thead><tr><th scope="col">Istituto</th><th scope="col" className="num">Strutturato 2025</th><th scope="col" className="num">Assegni/borse 2025</th><th scope="col" className="num">Risorse assestate 2024</th></tr></thead>
+            <thead><tr><th scope="col">Istituto</th><th scope="col" className="num">Strutturato 2025</th><th scope="col" className="num">Ricercatori 2025</th><th scope="col" className="num">Assegni/borse 2025</th><th scope="col" className="num">Risorse assestate 2024</th><th scope="col" className="num">Infrastrutture 2022-24</th><th scope="col" className="num">Progetti PNRR</th></tr></thead>
             <tbody>
               {view.cnrInstituteRows.map((row) => (
                 <tr key={row.id} className={selectedInstitute?.id === row.id ? styles.selectedRow : undefined}>
                   <th scope="row"><Link href={hrefFor(row.code, view.year, view.cnrDepartment.code, row.code)}>{row.code}</Link><span className={styles.cellSub}>{row.name}</span></th>
                   <td className="num">{displayValue(row.permanentHeadcount, "permanentHeadcount")}</td>
+                  <td className="num">{displayValue(row.researcherHeadcount, "researcherHeadcount")}</td>
                   <td className="num">{displayValue(row.researchAppointmentCount, "researchAppointmentCount")}</td>
-                  <td className="num">{displayValue(row.fundingAllocation, "fundingAllocation")}</td>
+                  <td className="num">{displayValue(row.assessedResources, "assessedResources")}</td>
+                  <td className="num">{displayValue(row.infrastructureCost, "infrastructureCost")}</td>
+                  <td className="num">{displayValue(row.projectCount, "projectCount")}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className={styles.note}>I valori DSB sono osservati nelle singole schede PDF; “risorse assestate” non equivale al bilancio completo dell&apos;istituto.</p>
+        <p className={styles.note}>I valori DSB sono osservati nelle singole schede PDF; “risorse assestate” è una serie di competenza e non equivale al bilancio completo dell&apos;istituto. Le infrastrutture sono il totale assestato del triennio 2022-24.</p>
       </section>
 
       <div className={styles.twoColumns}>
@@ -246,6 +274,14 @@ export default async function PublicResearchPage({
             ))}
           </div>
           <p className={styles.note}>La serie FOE è a livello di ente e non può essere sommata alle risorse assestate degli istituti DSB.</p>
+          {assessedResourcesTrend.length > 0 && (
+            <>
+              <h3 className={styles.subheading}>Risorse assestate del perimetro selezionato</h3>
+              <div className={styles.trendGrid}>
+                {assessedResourcesTrend.map((row) => <div className={styles.trendItem} key={`assessed-${row.year}`}><span>{row.year}</span><strong>{displayValue(row.value, "assessedResources")}</strong><small>schede CNR DSB</small></div>)}
+              </div>
+            </>
+          )}
         </section>
 
         <section className="panel" aria-labelledby="university-title">
@@ -255,11 +291,11 @@ export default async function PublicResearchPage({
           </div>
           <div className="table-scroll" role="region" aria-label="Personale universitario osservato per anno" tabIndex={0}>
             <table className="table">
-              <thead><tr><th scope="col">Anno</th><th scope="col" className="num">Strutturato*</th><th scope="col" className="num">Non strutturato</th></tr></thead>
-              <tbody>{universityStaff.map((row) => <tr key={row.year}><th scope="row">{row.year}</th><td className="num">{displayValue(row.permanent, "permanentHeadcount")}</td><td className="num">{displayValue(row.nonPermanent, "nonPermanentHeadcount")}</td></tr>)}</tbody>
+              <thead><tr><th scope="col">Anno</th><th scope="col" className="num">Strutturato*</th><th scope="col" className="num">Ricercatori*</th><th scope="col" className="num">Non strutturato</th></tr></thead>
+              <tbody>{universityStaff.map((row) => <tr key={row.year}><th scope="row">{row.year}</th><td className="num">{displayValue(row.permanent, "permanentHeadcount")}</td><td className="num">{displayValue(row.researchers, "researcherHeadcount")}</td><td className="num">{displayValue(row.nonPermanent, "nonPermanentHeadcount")}</td></tr>)}</tbody>
             </table>
           </div>
-          <p className={styles.note}>* USTAT accorpa 3RU e 3RTD; il gruppo strutturato include quindi anche ricercatori a tempo determinato. Non sono finanziamenti.</p>
+          <p className={styles.note}>* USTAT accorpa 3RU e 3RTD: il gruppo ricercatori è quindi una categoria pubblicata congiuntamente e rientra nello strutturato. Non sono finanziamenti.</p>
         </section>
       </div>
 

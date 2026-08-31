@@ -125,7 +125,7 @@ const querySchema = z.object({
     .describe("Codice o nome dell'istituto CNR, per esempio IBB o IFC.")
     .optional(),
   metric: z.string().max(60)
-    .describe("Metrica ricerca: fundingAllocation, permanentHeadcount, nonPermanentHeadcount o researchAppointmentCount.")
+    .describe("Metrica ricerca dichiarata nel catalogo public_research_investment, per esempio fundingAllocation, assessedResources, infrastructureCost, projectCount o una metrica di personale.")
     .optional(),
   limit: z.number().int().min(1).max(100)
     .describe("Numero massimo di record da restituire, da 1 a 100, solo per dataset che supportano limit.")

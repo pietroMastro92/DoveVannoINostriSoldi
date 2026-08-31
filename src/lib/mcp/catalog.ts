@@ -309,8 +309,8 @@ const datasetDescriptors: DatasetDescriptorInput[] = [
   {
     id: "public_research_investment",
     title: "Ricerca pubblica: finanziamenti, personale e precariato",
-    summary: "Snapshot verificato su FOE degli enti pubblici di ricerca, personale universitario USTAT e dettaglio granulare dei 14 istituti del dipartimento CNR DSB.",
-    sourceIds: ["mur-foe", "ustat-personale", "cnr-dsb"],
+    summary: "Snapshot verificato su FOE degli enti pubblici di ricerca, personale universitario USTAT e gerarchia CNR di 7 dipartimenti/83 istituti, con dettaglio finanziario e di personale per i 14 istituti DSB.",
+    sourceIds: ["mur-foe", "ustat-personale", "cnr-dsb", "cnr-structure"],
     customSources: [
       {
         id: "mur-foe",
@@ -335,10 +335,17 @@ const datasetDescriptors: DatasetDescriptorInput[] = [
         url: "https://dsb.cnr.it/istituti",
         cadence: "annuale",
       },
+      {
+        id: "cnr-structure",
+        name: "CNR · directory dipartimenti e istituti",
+        owner: "Consiglio Nazionale delle Ricerche",
+        url: "https://www.cnr.it/it/istituti",
+        cadence: "annuale",
+      },
     ],
     freshness: "snapshot",
     filters: ["year", "entity", "entityKind", "department", "institute", "metric", "limit", "offset"],
-    caveat: "Il FOE è un'assegnazione di competenza a livello di ente e non viene ripartito tra strutture CNR. Le schede DSB coprono un solo dipartimento e riportano personale 2025/risorse assestate 2024; USTAT copre il personale di 100 atenei ma non i loro finanziamenti. Progetti, procurement e pagamenti restano n.d. finché non esiste un rilascio ufficiale comparabile.",
+    caveat: "Il FOE è un'assegnazione di competenza a livello di ente e non viene ripartito tra strutture CNR. La directory CNR osservata espone 7 dipartimenti e 83 istituti; le schede DSB riportano personale 2025, ricercatori, risorse assestate 2021-2024, infrastrutture triennali e conteggi progetto senza importi. USTAT copre il personale di 100 atenei ma non i loro finanziamenti; pagamenti, procurement e costi di progetto restano n.d.",
   },
 ];
 

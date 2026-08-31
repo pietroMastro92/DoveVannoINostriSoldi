@@ -24,12 +24,16 @@ export type ResearchEntityKind = z.infer<typeof researchEntityKindSchema>;
 
 export const researchMetricSchema = z.enum([
   "fundingAllocation",
+  "assessedResources",
   "cashPayment",
   "economicCost",
   "permanentHeadcount",
+  "researcherHeadcount",
   "nonPermanentHeadcount",
   "researchAppointmentCount",
   "researchAppointmentGross",
+  "infrastructureCost",
+  "projectCount",
   "procurementAwarded",
   "procurementLiquidated",
   "projectCost",
@@ -42,10 +46,13 @@ export type ResearchUnit = z.infer<typeof researchUnitSchema>;
 
 export const researchMeasureSchema = z.enum([
   "allocation",
+  "assessed-budget",
   "payment",
   "cost",
   "headcount",
   "appointment",
+  "infrastructure-cost",
+  "project-count",
   "procurement-award",
   "procurement-payment",
   "project-cost",
@@ -156,12 +163,16 @@ export const researchObservationSchema = z.object({
 
   const expected: Record<ResearchMetric, { measure: ResearchMeasure; unit: ResearchUnit }> = {
     fundingAllocation: { measure: "allocation", unit: "euro-cents" },
+    assessedResources: { measure: "assessed-budget", unit: "euro-cents" },
     cashPayment: { measure: "payment", unit: "euro-cents" },
     economicCost: { measure: "cost", unit: "euro-cents" },
     permanentHeadcount: { measure: "headcount", unit: "count" },
+    researcherHeadcount: { measure: "headcount", unit: "count" },
     nonPermanentHeadcount: { measure: "headcount", unit: "count" },
     researchAppointmentCount: { measure: "appointment", unit: "count" },
     researchAppointmentGross: { measure: "appointment", unit: "euro-cents" },
+    infrastructureCost: { measure: "infrastructure-cost", unit: "euro-cents" },
+    projectCount: { measure: "project-count", unit: "count" },
     procurementAwarded: { measure: "procurement-award", unit: "euro-cents" },
     procurementLiquidated: { measure: "procurement-payment", unit: "euro-cents" },
     projectCost: { measure: "project-cost", unit: "euro-cents" },
@@ -174,7 +185,7 @@ export const researchObservationSchema = z.object({
   if (observation.unit !== rule.unit) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["unit"], message: `Unità incoerente con ${observation.metric}` });
   }
-  if (observation.metric === "permanentHeadcount" || observation.metric === "nonPermanentHeadcount") {
+  if (observation.metric === "permanentHeadcount" || observation.metric === "researcherHeadcount" || observation.metric === "nonPermanentHeadcount") {
     if (observation.accountingBasis !== "headcount") {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["accountingBasis"], message: "Il personale deve usare la base headcount" });
     }
@@ -248,6 +259,16 @@ export function validateResearchPublicSnapshot(input: unknown): ResearchPublicSn
     if (entity.parentId === entity.id) throw new Error(`Parent entità circolare: ${entity.id}`);
     if (entity.sourceIds.some((sourceId) => !sourceIds.has(sourceId))) {
       throw new Error(`Fonte entità non risolta: ${entity.id}`);
+    }
+  }
+
+  for (const entity of snapshot.entities) {
+    const seen = new Set<string>();
+    let currentId: string | null = entity.id;
+    while (currentId !== null) {
+      if (seen.has(currentId)) throw new Error(`Parent entità circolare: ${entity.id}`);
+      seen.add(currentId);
+      currentId = snapshot.entities.find((candidate) => candidate.id === currentId)?.parentId ?? null;
     }
   }
 
