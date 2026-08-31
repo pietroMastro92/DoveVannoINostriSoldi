@@ -396,6 +396,20 @@ export async function queryPublicDataset(
         offset,
       }));
     }
+    case "public_research_investment": {
+      const { queryPublicResearchDataset } = await import("@/lib/public-research");
+      return jsonSafe(queryPublicResearchDataset({
+        dataset: query.dataset,
+        year: query.year,
+        entity: query.entity,
+        entityKind: query.entityKind,
+        department: query.department,
+        institute: query.institute,
+        metric: query.metric,
+        limit,
+        offset,
+      }));
+    }
     default: {
       const unsupported: never = query.dataset;
       throw new Error(`Dataset non supportato: ${String(unsupported)}.`);

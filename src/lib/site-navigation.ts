@@ -31,6 +31,16 @@ export const PRIMARY_NAV: readonly NavSection[] = [
   },
   { href: "/istruzione", label: "Istruzione" },
   {
+    href: "/ricerca",
+    label: "Ricerca pubblica",
+    children: [
+      { href: "/ricerca", label: "Panoramica" },
+      { href: "/ricerca?entity=CNR", label: "CNR" },
+      { href: "/ricerca?department=DSB", label: "CNR · istituti DSB" },
+      { href: "/ricerca?entityKind=university", label: "Università" },
+    ],
+  },
+  {
     href: "/spese",
     label: "Soldi",
     aliases: ["/stato"],
@@ -133,6 +143,15 @@ export const SITE_MAP_GROUPS: readonly { title: string; links: readonly NavLink[
     ],
   },
   { title: "Istruzione", links: [{ href: "/istruzione", label: "Atlante Istruzione" }] },
+  {
+    title: "Ricerca pubblica",
+    links: [
+      { href: "/ricerca", label: "Panoramica" },
+      { href: "/ricerca?entity=CNR", label: "CNR" },
+      { href: "/ricerca?department=DSB", label: "CNR · istituti DSB" },
+      { href: "/ricerca?entityKind=university", label: "Università" },
+    ],
+  },
   {
     title: "Soldi",
     links: [

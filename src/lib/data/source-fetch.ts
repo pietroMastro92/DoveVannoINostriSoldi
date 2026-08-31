@@ -61,6 +61,11 @@ const ALLOWED_HOSTS: Readonly<Record<SourceId, readonly string[]>> = {
   bancaditalia: [],
   eurostat: [],
   "eurostat-hicp": [],
+  // Snapshot-only at runtime; the ETL pins official releases and the public
+  // page never downloads a source on request.
+  "mur-foe": [],
+  "ustat-personale": [],
+  "cnr-dsb": [],
 };
 
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);

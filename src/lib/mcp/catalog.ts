@@ -37,6 +37,7 @@ export const DATASET_IDS = [
   "company_production_value_bands",
   "company_turnover_istat",
   "education_students_by_pathway",
+  "public_research_investment",
 ] as const;
 
 export type DatasetId = (typeof DATASET_IDS)[number];
@@ -50,6 +51,10 @@ export const BUSINESS_DATASET_IDS = [
 
 export const EDUCATION_DATASET_IDS = [
   "education_students_by_pathway",
+] as const;
+
+export const RESEARCH_DATASET_IDS = [
+  "public_research_investment",
 ] as const;
 
 export type DatasetQuery = {
@@ -70,6 +75,11 @@ export type DatasetQuery = {
   years?: number;
   schoolType?: string;
   pathway?: string;
+  entity?: string;
+  entityKind?: string;
+  department?: string;
+  institute?: string;
+  metric?: string;
   limit?: number;
   offset?: number;
   cursor?: string;
@@ -184,6 +194,13 @@ const exampleQueries = {
     pathway: "SCIENTIFICO",
     limit: 20,
   },
+  public_research_investment: {
+    dataset: "public_research_investment",
+    year: 2024,
+    entity: "CNR",
+    department: "DSB",
+    limit: 20,
+  },
 } as const satisfies Record<DatasetId, DatasetQuery>;
 
 const COMPANY_ATLAS_SOURCES: DatasetDescriptor["sources"] = Object.values(companyAtlasSources).map((source) => ({
@@ -289,6 +306,40 @@ const datasetDescriptors: DatasetDescriptorInput[] = [
     filters: ["period", "region", "schoolType", "pathway", "limit", "offset"],
     caveat: "Studenti aggregati per Regione e percorso nel file MIM. Le variazioni descrivono la presenza nel dato osservato: non misurano qualità, esiti, domanda futura o carenze occupazionali. Le Regioni assenti dalla fonte restano n.d. e non vengono imputate.",
   },
+  {
+    id: "public_research_investment",
+    title: "Ricerca pubblica: finanziamenti, personale e precariato",
+    summary: "Snapshot verificato su FOE degli enti pubblici di ricerca, personale universitario USTAT e dettaglio granulare dei 14 istituti del dipartimento CNR DSB.",
+    sourceIds: ["mur-foe", "ustat-personale", "cnr-dsb"],
+    customSources: [
+      {
+        id: "mur-foe",
+        name: "MUR · Fondo ordinario per gli enti di ricerca (FOE)",
+        owner: "Ministero dell'Università e della Ricerca",
+        url: "https://www.mur.gov.it/it/aree-tematiche/ricerca/il-sistema-della-ricerca/enti-di-ricerca-pubblici/finanziamenti",
+        cadence: "annuale",
+      },
+      {
+        id: "ustat-personale",
+        name: "USTAT · Personale universitario",
+        owner: "Ministero dell'Università e della Ricerca",
+        url: "https://dati-ustat.mur.gov.it/dataset/263a4704-a5cb-46c3-9062-4f977c9fd3e7",
+        cadence: "annuale",
+        license: "IODL 2.0",
+        licenseUrl: "http://www.dati.gov.it/content/italian-open-data-license-v20",
+      },
+      {
+        id: "cnr-dsb",
+        name: "CNR · Dipartimento di scienze biomediche",
+        owner: "Consiglio Nazionale delle Ricerche",
+        url: "https://dsb.cnr.it/istituti",
+        cadence: "annuale",
+      },
+    ],
+    freshness: "snapshot",
+    filters: ["year", "entity", "entityKind", "department", "institute", "metric", "limit", "offset"],
+    caveat: "Il FOE è un'assegnazione di competenza a livello di ente e non viene ripartito tra strutture CNR. Le schede DSB coprono un solo dipartimento e riportano personale 2025/risorse assestate 2024; USTAT copre il personale di 100 atenei ma non i loro finanziamenti. Progetti, procurement e pagamenti restano n.d. finché non esiste un rilascio ufficiale comparabile.",
+  },
 ];
 
 export const datasetCatalog: DatasetDescriptor[] = datasetDescriptors.map((dataset) => {
@@ -320,4 +371,10 @@ const educationDatasetIdSet = new Set<string>(EDUCATION_DATASET_IDS);
 
 export const educationDatasetCatalog = datasetCatalog.filter((dataset) =>
   educationDatasetIdSet.has(dataset.id),
+);
+
+const researchDatasetIdSet = new Set<string>(RESEARCH_DATASET_IDS);
+
+export const researchDatasetCatalog = datasetCatalog.filter((dataset) =>
+  researchDatasetIdSet.has(dataset.id),
 );

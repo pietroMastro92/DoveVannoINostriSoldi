@@ -755,6 +755,30 @@
       "trustModel": "The committed snapshot and source-file manifest are derived from official MIM IODL 2.0 CSV releases. The offline check validates source hashes, schema, duplicate protection, school-code joins, regional coverage gaps, student/gender reconciliations and the aggregate-only boundary; fixture reconciliation tests cover malformed schemas, incoherent periods or roles, duplicate source URLs and orphan school codes before a future refresh is reviewed for publication."
     },
     {
+      "id": "public-research",
+      "owner": "Ricerca pubblica: FOE, USTAT e CNR DSB",
+      "files": [
+        "src/data/generated/public-research-snapshot.json"
+      ],
+      "verificationMode": "online-refresh",
+      "offlineCheck": {
+        "command": "python3 scripts/etl/public_research_snapshot.py --check",
+        "coveredBy": "standalone"
+      },
+      "reconciliationTests": [
+        "tests/etl/test_public_research_snapshot.py"
+      ],
+      "nodeTests": [
+        "tests/public-research.test.mjs"
+      ],
+      "generator": {
+        "command": "python3 scripts/etl/public_research_snapshot.py --ustat-csv <official-USTAT-CSV>",
+        "requiresNetworkInput": true
+      },
+      "refreshWorkflow": null,
+      "trustModel": "Snapshot derivato da MUR FOE, USTAT e schede pubbliche CNR DSB con hash delle ricevute. Il controllo offline valida riferimenti, periodi, duplicati, interi in centesimi e assenza di dati individuali; la copertura parziale impedisce di presentare il FOE come ripartito tra istituti CNR."
+    },
+    {
       "id": "source-ledger-proofs",
       "owner": "Source ledger integrity proofs",
       "files": [

@@ -80,6 +80,9 @@ const exhaustiveLatestDataBySlug = {
     label: `${istatPensionsSnapshot.data.period.from}-${istatPensionsSnapshot.data.period.to}`,
   },
   [MEF_IRPEF_SOURCE.id]: MEF_IRPEF_SOURCE.latestData,
+  "mur-foe": { kind: "period", label: "FOE 2024" },
+  "ustat-personale": { kind: "period", label: "personale 2020-2024" },
+  "cnr-dsb": { kind: "period", label: "schede 2025 · dati 2024" },
 } satisfies Readonly<Record<SourceId, SourceLatestData>>;
 
 // Public source slugs come from content data and are intentionally typed as

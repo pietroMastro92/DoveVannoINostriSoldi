@@ -24,7 +24,10 @@ export type SourceId =
   | "eurostat"
   | "eurostat-hicp"
   | "ameco"
-  | "governi-presidenza";
+  | "governi-presidenza"
+  | "mur-foe"
+  | "ustat-personale"
+  | "cnr-dsb";
 
 export type SourceCadence =
   | "giornaliera"
@@ -383,6 +386,48 @@ export const SOURCE_POLICIES: Readonly<Record<SourceId, SourcePolicy>> = {
     timeoutMs: 20_000,
     maxRetries: 2,
     tags: ["source:eurostat-hicp", "domain:government-scorecard"],
+  },
+  "mur-foe": {
+    id: "mur-foe",
+    label: "MUR · Fondo ordinario per gli enti di ricerca (FOE)",
+    owner: "Ministero dell'Università e della Ricerca",
+    sourceUrl: "https://www.mur.gov.it/it/aree-tematiche/ricerca/il-sistema-della-ricerca/enti-di-ricerca-pubblici/finanziamenti",
+    cadence: "annuale",
+    cadenceNote: "Il MUR pubblica le tabelle FOE con i decreti annuali; il modulo usa snapshot hashati a livello di ente.",
+    discoveryRevalidateSeconds: DAY,
+    dataRevalidateSeconds: DAY,
+    staleAfterSeconds: null,
+    timeoutMs: 20_000,
+    maxRetries: 1,
+    tags: ["source:mur-foe", "domain:public-research"],
+  },
+  "ustat-personale": {
+    id: "ustat-personale",
+    label: "USTAT · Personale universitario",
+    owner: "Ministero dell'Università e della Ricerca",
+    sourceUrl: "https://dati-ustat.mur.gov.it/dataset/263a4704-a5cb-46c3-9062-4f977c9fd3e7",
+    cadence: "annuale",
+    cadenceNote: "Il dataset CKAN USTAT pubblica annualmente il personale universitario per ateneo e qualifica.",
+    discoveryRevalidateSeconds: DAY,
+    dataRevalidateSeconds: DAY,
+    staleAfterSeconds: null,
+    timeoutMs: 30_000,
+    maxRetries: 1,
+    tags: ["source:ustat-personale", "domain:public-research"],
+  },
+  "cnr-dsb": {
+    id: "cnr-dsb",
+    label: "CNR · Dipartimento di scienze biomediche",
+    owner: "Consiglio Nazionale delle Ricerche",
+    sourceUrl: "https://dsb.cnr.it/istituti",
+    cadence: "annuale",
+    cadenceNote: "Le schede Facts&Figures del DSB sono pubblicate per istituto e anno; il modulo conserva le ricevute PDF.",
+    discoveryRevalidateSeconds: DAY,
+    dataRevalidateSeconds: DAY,
+    staleAfterSeconds: null,
+    timeoutMs: 30_000,
+    maxRetries: 1,
+    tags: ["source:cnr-dsb", "domain:public-research"],
   },
 };
 

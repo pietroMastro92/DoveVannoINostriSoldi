@@ -29,6 +29,7 @@ import { getPublicDebtSnapshot } from "@/lib/public-debt";
 import { getGovernmentScorecardSnapshot } from "@/lib/government-scorecard";
 import { getGovernmentScorecardForecastCoverage } from "@/lib/data/government-scorecard-contract";
 import { getGovernmentCurrentSignalsSnapshot } from "@/lib/government-current-signals";
+import { publicResearchSnapshot } from "@/lib/public-research";
 import istatMunicipalityGeographyMetadata from "@/data/generated/istat-municipality-geography.meta.json";
 
 export type SourceIntegrationState = "active";
@@ -594,6 +595,23 @@ function snapshotManagedGovernmentCurrentSignals(): SourceHealth {
   };
 }
 
+function snapshotManagedPublicResearch(sourceId: "mur-foe" | "ustat-personale" | "cnr-dsb"): SourceHealth {
+  const source = publicResearchSnapshot.sources.find((item) => item.id === sourceId || item.id.startsWith(`${sourceId}-`));
+  const recordCount = sourceId === "ustat-personale"
+    ? publicResearchSnapshot.observations.filter((row) => row.sourceIds.includes("ustat-personale")).length
+    : sourceId === "cnr-dsb"
+      ? publicResearchSnapshot.observations.filter((row) => row.sourceIds.some((id) => id.startsWith("cnr-dsb-") || id === "cnr-dsb-index")).length
+      : publicResearchSnapshot.observations.filter((row) => row.sourceIds.some((id) => id.startsWith("mur-foe-"))).length;
+  return {
+    ...baseHealth(sourceId),
+    reachability: "not-probed",
+    freshness: freshnessFor(sourceId, publicResearchSnapshot.verifiedAt),
+    latencyMs: null,
+    detail: `Snapshot ricerca pubblica verificato il ${publicResearchSnapshot.verifiedAt.slice(0, 10)} · ${source?.title ?? sourceId} · ${recordCount} osservazioni`,
+    recordCount,
+  };
+}
+
 function snapshotManagedGovernmentScorecard(
   sourceId: "ameco" | "governi-presidenza",
 ): SourceHealth {
@@ -645,6 +663,9 @@ export function getSnapshotManagedSourceHealth(): SourceHealth[] {
     snapshotManagedPublicDebt("bancaditalia"),
     snapshotManagedPublicDebt("eurostat"),
     snapshotManagedGovernmentCurrentSignals(),
+    snapshotManagedPublicResearch("mur-foe"),
+    snapshotManagedPublicResearch("ustat-personale"),
+    snapshotManagedPublicResearch("cnr-dsb"),
   ];
 }
 
@@ -675,6 +696,9 @@ export const SOURCE_HEALTH_ADAPTERS = Object.freeze({
   bancaditalia: () => snapshotManagedPublicDebt("bancaditalia"),
   eurostat: () => snapshotManagedPublicDebt("eurostat"),
   "eurostat-hicp": snapshotManagedGovernmentCurrentSignals,
+  "mur-foe": () => snapshotManagedPublicResearch("mur-foe"),
+  "ustat-personale": () => snapshotManagedPublicResearch("ustat-personale"),
+  "cnr-dsb": () => snapshotManagedPublicResearch("cnr-dsb"),
 } satisfies Record<SourceId, SourceHealthAdapter>);
 
 /** Orders every adapter by the public registry and fails closed on omissions. */

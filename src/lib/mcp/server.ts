@@ -112,6 +112,21 @@ const querySchema = z.object({
   pathway: z.string().max(80)
     .describe("Codice o etichetta del percorso di studio del dataset istruzione.")
     .optional(),
+  entity: z.string().max(120)
+    .describe("Codice, identificativo o nome dell'ente di ricerca da interrogare.")
+    .optional(),
+  entityKind: z.string().max(40)
+    .describe("Tipo di ente ricerca: system, university, epr, cnr-department oppure cnr-institute.")
+    .optional(),
+  department: z.string().max(120)
+    .describe("Codice o nome del dipartimento CNR, per esempio DSB.")
+    .optional(),
+  institute: z.string().max(120)
+    .describe("Codice o nome dell'istituto CNR, per esempio IBB o IFC.")
+    .optional(),
+  metric: z.string().max(60)
+    .describe("Metrica ricerca: fundingAllocation, permanentHeadcount, nonPermanentHeadcount o researchAppointmentCount.")
+    .optional(),
   limit: z.number().int().min(1).max(100)
     .describe("Numero massimo di record da restituire, da 1 a 100, solo per dataset che supportano limit.")
     .optional(),
