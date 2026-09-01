@@ -138,8 +138,17 @@ export default async function PublicResearchPage({
   const selectedInfrastructure = metricValue(view.summary.infrastructureCost, "infrastructureCost");
   const selectedProjects = metricValue(view.summary.projectCount, "projectCount");
   const isCnrRoot = scope === "cnr" && view.selectedEntity.code === "CNR";
-  const headlineMetric: ResearchMetric = selectedFunding !== null ? "fundingAllocation" : "assessedResources";
-  const headlineValue = selectedFunding ?? selectedAssessed;
+  const headlineMetric: ResearchMetric = selectedFunding !== null
+    ? "fundingAllocation"
+    : selectedAssessed !== null
+      ? "assessedResources"
+      : "permanentHeadcount";
+  const headlineValue = selectedFunding ?? selectedAssessed ?? selectedPermanent;
+  const headlineLabel = headlineMetric === "fundingAllocation"
+    ? "assegnazione FOE osservata"
+    : headlineMetric === "assessedResources"
+      ? "risorse assestate osservate"
+      : "personale strutturato osservato";
   const latestSource = view.scopeCoverage.sources.reduce((latest, source) => source.observedAt > latest ? source.observedAt : latest, "");
   const eprRows = scope === "epr"
     ? queryPublicResearchDataset({ scope, year: view.year, metric: "fundingAllocation", limit: 100 }).data
@@ -209,7 +218,7 @@ export default async function PublicResearchPage({
           </div>
           <strong className={styles.headline}>{displayValue(headlineValue, headlineMetric)}</strong>
           <p className={styles.headlineNote}>
-            {headlineValue === null ? "finanziamento osservato non disponibile" : headlineMetric === "fundingAllocation" ? "assegnazione FOE osservata" : "risorse assestate osservate"}
+            {headlineValue === null ? "dato principale non disponibile" : headlineLabel}
             {" · anno "}{view.year}
           </p>
           <dl className={styles.factRows}>
@@ -223,7 +232,7 @@ export default async function PublicResearchPage({
           <p className={styles.definition}>
             {headlineValue === null
               ? "La fonte non pubblica un valore omogeneo per questo perimetro e anno: mostriamo n.d. senza stimare."
-              : `Valore esatto: ${exactValue(headlineValue, headlineMetric)}. ${headlineMetric === "fundingAllocation" ? "È un'assegnazione di competenza, non un pagamento di cassa." : "È una risorsa assestata osservata, non il bilancio completo dell'ente."}`}
+              : `Valore esatto: ${exactValue(headlineValue, headlineMetric)}. ${headlineMetric === "fundingAllocation" ? "È un'assegnazione di competenza, non un pagamento di cassa." : headlineMetric === "assessedResources" ? "È una risorsa assestata osservata, non il bilancio completo dell'ente." : "È un conteggio di personale, non una misura finanziaria."}`}
           </p>
         </section>
 

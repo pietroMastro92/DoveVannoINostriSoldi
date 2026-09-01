@@ -3,7 +3,7 @@ import { queryPublicResearchDataset, type PublicResearchDatasetQuery } from "@/l
 
 // Query parameters define the dataset response; do not prerender one default query.
 export const dynamic = "force-dynamic";
-export const MAX_PUBLIC_RESEARCH_RESPONSE_BYTES = 750_000;
+const MAX_PUBLIC_RESEARCH_RESPONSE_BYTES = 750_000;
 
 const ALLOWED_PARAMS = new Set([
   "scope",
