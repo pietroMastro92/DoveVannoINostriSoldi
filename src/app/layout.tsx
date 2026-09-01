@@ -48,9 +48,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Browser extensions may add attributes to <body> before React hydrates.
   return (
     <html lang="it" className={geist.variable}>
-      <body>
+      <body suppressHydrationWarning>
         <GoogleAnalytics />
         <a className="skip-link" href="#contenuto-principale">Salta al contenuto principale</a>
         <Navigation />
