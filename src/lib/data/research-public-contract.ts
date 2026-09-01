@@ -10,8 +10,12 @@ import { z } from "zod";
  */
 export const RESEARCH_PUBLIC_DATASET_ID = "public_research_investment" as const;
 export const RESEARCH_PUBLIC_SCHEMA_VERSION = 1 as const;
+export const RESEARCH_PUBLIC_MIN_YEAR = 2024 as const;
 
 export const RESEARCH_PUBLIC_YEARS = [2020, 2021, 2022, 2023, 2024, 2025] as const;
+
+export const researchScopeSchema = z.enum(["cnr", "epr", "university"]);
+export type ResearchScope = z.infer<typeof researchScopeSchema>;
 
 export const researchEntityKindSchema = z.enum([
   "system",

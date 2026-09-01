@@ -75,6 +75,7 @@ export type DatasetQuery = {
   years?: number;
   schoolType?: string;
   pathway?: string;
+  scope?: string;
   entity?: string;
   entityKind?: string;
   department?: string;
@@ -196,6 +197,7 @@ const exampleQueries = {
   },
   public_research_investment: {
     dataset: "public_research_investment",
+    scope: "cnr",
     year: 2024,
     entity: "CNR",
     department: "DSB",
@@ -309,7 +311,7 @@ const datasetDescriptors: DatasetDescriptorInput[] = [
   {
     id: "public_research_investment",
     title: "Ricerca pubblica: finanziamenti, personale e precariato",
-    summary: "Snapshot verificato su FOE degli enti pubblici di ricerca, personale universitario USTAT e gerarchia CNR di 7 dipartimenti/83 istituti, con dettaglio finanziario e di personale per i 14 istituti DSB.",
+    summary: "Snapshot verificato dal 2024 su FOE, personale universitario USTAT e gerarchia CNR di 7 dipartimenti/83 istituti, con ambiti CNR, altri EPR e università separati.",
     sourceIds: ["mur-foe", "ustat-personale", "cnr-dsb", "cnr-structure"],
     customSources: [
       {
@@ -344,8 +346,8 @@ const datasetDescriptors: DatasetDescriptorInput[] = [
       },
     ],
     freshness: "snapshot",
-    filters: ["year", "entity", "entityKind", "department", "institute", "metric", "limit", "offset"],
-    caveat: "Il FOE è un'assegnazione di competenza a livello di ente e non viene ripartito tra strutture CNR. La directory CNR osservata espone 7 dipartimenti e 83 istituti; le schede DSB riportano personale 2025, ricercatori, risorse assestate 2021-2024, infrastrutture triennali e conteggi progetto senza importi. USTAT copre il personale di 100 atenei ma non i loro finanziamenti; pagamenti, procurement e costi di progetto restano n.d.",
+    filters: ["scope", "year", "entity", "entityKind", "department", "institute", "metric", "limit", "offset"],
+    caveat: "Gli ambiti cnr, epr e university sono mutuamente esclusivi. Il FOE è un'assegnazione di competenza a livello di ente e non viene ripartito tra strutture CNR. Le schede DSB riportano personale 2025, risorse assestate 2021-2024, infrastrutture triennali e conteggi progetto senza importi; USTAT copre il personale di 100 atenei ma non i loro finanziamenti. I periodi precedenti al 2024 restano interrogabili come baseline storica; la pagina corrente parte dal 2024.",
   },
 ];
 

@@ -112,6 +112,9 @@ const querySchema = z.object({
   pathway: z.string().max(80)
     .describe("Codice o etichetta del percorso di studio del dataset istruzione.")
     .optional(),
+  scope: z.enum(["cnr", "epr", "university"])
+    .describe("Ambito della ricerca pubblica: cnr, epr (altri enti pubblici di ricerca) oppure university.")
+    .optional(),
   entity: z.string().max(120)
     .describe("Codice, identificativo o nome dell'ente di ricerca da interrogare.")
     .optional(),

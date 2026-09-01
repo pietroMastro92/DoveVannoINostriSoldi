@@ -322,6 +322,7 @@ test("MCP query tool describes every input parameter for clients and directories
     "years",
     "schoolType",
     "pathway",
+    "scope",
     "entity",
     "entityKind",
     "department",

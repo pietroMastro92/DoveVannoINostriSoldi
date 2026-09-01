@@ -14,7 +14,7 @@
 - [Fondi e progetti](https://www.dovevannoinostrisoldi.com/coesione): aggregati OpenCoesione su costi, pagamenti, temi, nature e stati.
 - [Enti e società](https://www.dovevannoinostrisoldi.com/enti): ricerca nell'Indice PA e collegamenti alle partecipazioni pubbliche.
 - [Istruzione](https://www.dovevannoinostrisoldi.com/istruzione): studenti aggregati MIM della scuola secondaria di II grado per Regione, tipo di scuola e percorso nel triennio 2022/23-2024/25; copertura e valori mancanti restano espliciti.
-- [Ricerca pubblica](https://www.dovevannoinostrisoldi.com/ricerca): finanziamenti FOE, personale universitario USTAT e gerarchia CNR di 7 dipartimenti/83 istituti; le serie finanziarie, di personale, infrastrutture e progetti a grana istituto sono osservate nelle 14 schede DSB, con assegnazioni e limiti contabili distinti.
+- [Ricerca pubblica](https://www.dovevannoinostrisoldi.com/ricerca): dal 2024 separa CNR, altri enti pubblici di ricerca e università; espone FOE, personale USTAT, gerarchia CNR di 7 dipartimenti/83 istituti e osservazioni granulari DSB con limiti contabili distinti.
 - [Parlamento](https://www.dovevannoinostrisoldi.com/parlamento): documenti e valori strutturati verificati della Camera, quando disponibili.
 - [Pagella economica dei governi](https://www.dovevannoinostrisoldi.com/governi): Core macroeconomico annuale dal 1995, confronto con tre paesi europei, contesto e misure separati dall'attribuzione causale.
 - [Cosa controllare](https://www.dovevannoinostrisoldi.com/controlli): indicatori e segnali per orientare verifiche ulteriori.
@@ -27,6 +27,7 @@
 - [Assistente testuale](https://www.dovevannoinostrisoldi.com/assistente): interfaccia deterministica read-only con pochi intenti allowlisted; non usa provider LLM o voce e non conserva il prompt.
 - [API assistente](https://www.dovevannoinostrisoldi.com/api/assistant): `POST` JSON same-origin con `{ "prompt": "..." }`; una sola query, prompt massimo 500 caratteri e timeout bounded.
 - [Catalogo fonti via API](https://www.dovevannoinostrisoldi.com/api/fonti/stato): stato operativo delle fonti quando disponibile.
+- [API ricerca pubblica](https://www.dovevannoinostrisoldi.com/api/ricerca?scope=cnr&year=2024): dataset paginato con ambito, anno, ente, dipartimento, istituto e metrica; le assegnazioni FOE non vengono imputate alle strutture interne.
 - [API pagamenti comunali](https://www.dovevannoinostrisoldi.com/api/spese/comuni): pagamenti SIOPE dei Comuni, con periodo e filtri dichiarati.
 - [API distribuzione comunale](https://www.dovevannoinostrisoldi.com/api/spese/comuni/distribuzione): aggregati completi pesati per residenti e per Comune, pubblicati solo dopo un refresh raw verificato; non restituisce righe comunali.
 - [API spesa invalidità civile](https://www.dovevannoinostrisoldi.com/api/spese/invalidita): contabilità INPS separata da SIOPE; spesa nazionale e granularità regionale verificata.

@@ -35,9 +35,10 @@ export const PRIMARY_NAV: readonly NavSection[] = [
     label: "Ricerca pubblica",
     children: [
       { href: "/ricerca", label: "Panoramica" },
-      { href: "/ricerca?entity=CNR", label: "CNR" },
-      { href: "/ricerca?department=DSB", label: "CNR · istituti DSB" },
-      { href: "/ricerca?entityKind=university", label: "Università" },
+      { href: "/ricerca?scope=cnr", label: "CNR" },
+      { href: "/ricerca?scope=cnr&department=DSB", label: "CNR · istituti DSB" },
+      { href: "/ricerca?scope=epr", label: "Altri enti di ricerca" },
+      { href: "/ricerca?scope=university", label: "Università" },
     ],
   },
   {
@@ -147,9 +148,10 @@ export const SITE_MAP_GROUPS: readonly { title: string; links: readonly NavLink[
     title: "Ricerca pubblica",
     links: [
       { href: "/ricerca", label: "Panoramica" },
-      { href: "/ricerca?entity=CNR", label: "CNR" },
-      { href: "/ricerca?department=DSB", label: "CNR · istituti DSB" },
-      { href: "/ricerca?entityKind=university", label: "Università" },
+      { href: "/ricerca?scope=cnr", label: "CNR" },
+      { href: "/ricerca?scope=cnr&department=DSB", label: "CNR · istituti DSB" },
+      { href: "/ricerca?scope=epr", label: "Altri enti di ricerca" },
+      { href: "/ricerca?scope=university", label: "Università" },
     ],
   },
   {

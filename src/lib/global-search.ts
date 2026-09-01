@@ -137,6 +137,7 @@ const ROUTE_ALIASES: Readonly<Record<string, readonly string[]>> = {
   "/trasparenza": ["trasparenza", "documenti mancanti", "atti"],
   "/assistente": ["domande", "domande testuali", "ai dati"],
   "/mcp": ["model context protocol", "protocollo mcp", "api dati"],
+  "/ricerca": ["ricerca pubblica", "foe", "ffo", "cnr", "enti di ricerca", "universita", "ricercatori", "precariato", "assegni di ricerca", "infrastrutture di ricerca", "progetti di ricerca"],
   "/supporto": ["aiuto", "assistenza"],
   "/fonti": ["fonti", "sorgenti", "origine dati"],
   "/fonti/stato": ["stato fonti", "aggiornamento fonti", "salute fonti"],

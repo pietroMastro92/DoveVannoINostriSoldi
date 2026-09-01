@@ -400,6 +400,7 @@ export async function queryPublicDataset(
       const { queryPublicResearchDataset } = await import("@/lib/public-research");
       return jsonSafe(queryPublicResearchDataset({
         dataset: query.dataset,
+        scope: query.scope,
         year: query.year,
         entity: query.entity,
         entityKind: query.entityKind,
